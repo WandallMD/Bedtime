@@ -7,11 +7,9 @@ function toggleTimer() {
   if (isRunning) {
     pauseTimer();
   } else {
-    Howler.ctx.resume(); // Resume the AudioContext when starting the timer
     startTimer();
   }
 }
-
 
 function startTimer() {
   if (isRunning) return;
@@ -33,7 +31,6 @@ function pauseTimer() {
   isRunning = false;
 }
 
-// Add sounds using Howler.js
 const fanfareSound = new Howl({
   src: ['fanfare.aac']
 });
@@ -42,17 +39,18 @@ const sadSound = new Howl({
   src: ['sad.aac']
 });
 
-// Rest of the script.js content
-
 function updateMask() {
   const mask = document.querySelector(".mask");
   const percentage = elapsed / totalTime;
   const angle = percentage * 360;
   mask.setAttribute("d", describePieSlice(500, 500, 450, -90, angle - 90));
 
-  // Add the check for the end of the timer
+  checkFanfareAndConfetti();
+
   if (elapsed >= totalTime) {
     clearInterval(interval);
+    isRunning = false;
+    elapsed = 0;
     checkEndConditions();
   }
 }
@@ -61,38 +59,30 @@ function taskClickHandler(event) {
   const checkmark = event.currentTarget.querySelector(".checkmark");
   checkmark.style.opacity = checkmark.style.opacity === "1" ? "0" : "1";
 
+  checkFanfareAndConfetti();
+}
+
+function checkFanfareAndConfetti() {
   const checkmarks = document.querySelectorAll(".checkmark");
   const allTasksComplete = Array.from(checkmarks).every(
     (checkmark) => checkmark.style.opacity === "1"
   );
 
-  // Check the end conditions only if the timer is running (not reached the end)
   if (isRunning && allTasksComplete) {
     fanfareSound.play();
     confettiAnimation();
   }
 }
 
-
 function checkEndConditions() {
   const checkmarks = document.querySelectorAll(".checkmark");
   const allTasksComplete = Array.from(checkmarks).every((checkmark) => checkmark.style.opacity === "1");
 
-  console.log("Elapsed time:", elapsed);
-  console.log("Total time:", totalTime);
-  console.log("All tasks complete:", allTasksComplete);
-
-  if (elapsed < totalTime && allTasksComplete) {
-    console.log("Playing fanfare and showing confetti");
-    fanfareSound.play();
-    confettiAnimation();
-  } else if (elapsed >= totalTime && !allTasksComplete) {
-    console.log("Playing sad sound and showing sad smiley");
+  if (!allTasksComplete) {
     sadSound.play();
     showSadSmiley();
   }
 }
-
 
 function confettiAnimation() {
   const confettiSettings = { angle: 90, spread: 45, particleCount: 100, origin: { y: 0.9 } };
@@ -104,8 +94,6 @@ function showSadSmiley() {
   sadSmiley.innerHTML = '<i class="far fa-frown" style="font-size: 8em; color: #ee4035; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);"></i>';
   document.body.appendChild(sadSmiley);
 }
-
-
 
 function describePieSlice(cx, cy, r, startAngle, endAngle) {
   const startX = cx + r * Math.cos((Math.PI * startAngle) / 180);
@@ -125,9 +113,7 @@ function describePieSlice(cx, cy, r, startAngle, endAngle) {
   return pathData;
 }
 
-function toggleCheckmark(taskElement) {
-  const checkmark = taskElement.querySelector(".checkmark");
-  checkmark.style.opacity = checkmark.style.opacity === "1" ? "0" : "1";
-}
+document.querySelectorAll(".task").forEach(task => {
+  task.addEventListener("click", taskClickHandler);
+});
 
-// Rest of the script.js content
