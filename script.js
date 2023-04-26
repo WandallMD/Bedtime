@@ -61,9 +61,18 @@ function taskClickHandler(event) {
   const checkmark = event.currentTarget.querySelector(".checkmark");
   checkmark.style.opacity = checkmark.style.opacity === "1" ? "0" : "1";
 
-  // Check the end conditions every time a task is clicked
-  checkEndConditions();
+  const checkmarks = document.querySelectorAll(".checkmark");
+  const allTasksComplete = Array.from(checkmarks).every(
+    (checkmark) => checkmark.style.opacity === "1"
+  );
+
+  // Check the end conditions only if the timer is running (not reached the end)
+  if (isRunning && allTasksComplete) {
+    fanfareSound.play();
+    confettiAnimation();
+  }
 }
+
 
 function checkEndConditions() {
   const checkmarks = document.querySelectorAll(".checkmark");
